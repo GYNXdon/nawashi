@@ -1,9 +1,11 @@
 import express, { json } from "express";
 import bodyParser from "body-parser";
 import { handleWebhook } from "./handleWebhook";
+import logger from "morgan";
 
 const app = express();
 
+app.use(logger("dev"));
 app.use(json({ limit: "2mb" }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -14,9 +16,8 @@ app.use("/", (req, res) => {
   return res.send("Welcome to My Auto Trader");
 });
 
-
 // errors & edge cases
-app.use((err, req, res, _) => {
+app.use((err, req, res) => {
   res.status(err.status || 500);
   res.json({
     err: {
@@ -29,9 +30,10 @@ app.use((req, res, next) => {
   const error = new Error("Route Not Found");
   error.message = "404";
   next(error);
-  return res.status(404).send({
+  res.status(404).send({
     message: "Route Not Found",
   });
 });
 
 export default app;
+
